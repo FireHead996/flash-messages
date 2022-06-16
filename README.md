@@ -21,8 +21,9 @@ This example assumes that you have `php-di/php-di` installed.
 
 use DI\ContainerBuilder;
 use Slim\Factory\AppFactory;
-use Slim\Flash\Messages;
 use Slim\Routing\RouteContext;
+use Firehead996\Flash\MessagesInterface;
+use Firehead996\Flash\Messages;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -31,7 +32,7 @@ $containerBuilder = new ContainerBuilder();
 // Add container definition for the flash component
 $containerBuilder->addDefinitions(
     [
-        'flash' => function () {
+        MessagesInterface::class => function () {
             $storage = [];
             return new Messages($storage);
         }
@@ -50,7 +51,7 @@ $app->add(function ($request, $next) {
     }
 
     // Change flash message storage
-    $this->get('flash')->__construct($_SESSION);
+    $this->get(MessagesInterface::class)->__construct($_SESSION);
 
     return $next->handle($request);
 });
@@ -60,7 +61,7 @@ $app->addErrorMiddleware(true, true, true);
 // Add routes
 $app->get('/', function ($request, $response) {
     // Set flash message for next request
-    $this->get('flash')->addMessage('Test', 'This is a message');
+    $this->get(MessagesInterface::class)->addMessage('Test', 'This is a message');
 
     // Redirect
     $url = RouteContext::fromRequest($request)->getRouteParser()->urlFor('bar');
@@ -69,7 +70,7 @@ $app->get('/', function ($request, $response) {
 });
 
 $app->get('/bar', function ($request, $response) {
-    $flash = $this->get('flash');
+    $flash = $this->get(MessagesInterface::class);
 
     // Get flash messages from previous request
     $messages = $flash->getMessages();
