@@ -1,5 +1,8 @@
 <?php
-namespace Slim\Flash;
+
+declare(strict_types=1);
+
+namespace Firehead996\Flash;
 
 use ArrayAccess;
 use RuntimeException;
@@ -8,26 +11,26 @@ use InvalidArgumentException;
 /**
  * Flash messages
  */
-class Messages
+class Messages implements MessagesInterface
 {
     /**
      * Messages from previous request
      *
-     * @var string[]
+     * @var mixed[]
      */
     protected $fromPrevious = [];
 
     /**
      * Messages for current request
      *
-     * @var string[]
+     * @var mixed[]
      */
     protected $forNow = [];
 
     /**
      * Messages for next request
      *
-     * @var string[]
+     * @var mixed[]
      */
     protected $forNext = [];
 
@@ -43,16 +46,18 @@ class Messages
      *
      * @var string
      */
-    protected $storageKey = 'slimFlash';
+    protected $storageKey = 'flash';
 
     /**
      * Create new Flash messages service provider
      *
      * @param null|array|ArrayAccess $storage
+     * @param null|string $storageKey
+     * 
      * @throws RuntimeException if the session cannot be found
      * @throws InvalidArgumentException if the store is not array-like
      */
-    public function __construct(&$storage = null, $storageKey = null)
+    public function __construct(mixed &$storage = null, string $storageKey = null)
     {
         if (is_string($storageKey) && $storageKey) {
             $this->storageKey = $storageKey;
@@ -74,6 +79,7 @@ class Messages
         if (isset($this->storage[$this->storageKey]) && is_array($this->storage[$this->storageKey])) {
             $this->fromPrevious = $this->storage[$this->storageKey];
         }
+
         $this->storage[$this->storageKey] = [];
     }
 
@@ -83,7 +89,7 @@ class Messages
      * @param string $key The key to store the message under
      * @param mixed  $message Message to show on next request
      */
-    public function addMessage($key, $message)
+    public function addMessage(string $key, mixed $message): void
     {
         // Create Array for this key
         if (!isset($this->storage[$this->storageKey][$key])) {
@@ -100,7 +106,7 @@ class Messages
      * @param string $key The key to store the message under
      * @param mixed  $message Message to show for the current request
      */
-    public function addMessageNow($key, $message)
+    public function addMessageNow(string $key, mixed $message): void
     {
         // Create Array for this key
         if (!isset($this->forNow[$key])) {
@@ -116,7 +122,7 @@ class Messages
      *
      * @return array Messages to show for current request
      */
-    public function getMessages()
+    public function getMessages(): array
     {
         $messages = $this->fromPrevious;
 
@@ -137,9 +143,10 @@ class Messages
      * Get Flash Message
      *
      * @param string $key The key to get the message from
+     * 
      * @return mixed|null Returns the message
      */
-    public function getMessage($key)
+    public function getMessage(string $key): mixed
     {
         $messages = $this->getMessages();
 
@@ -152,9 +159,10 @@ class Messages
      *
      * @param  string $key The key to get the message from
      * @param  string $default Default value if key doesn't exist
+     * 
      * @return mixed Returns the message
      */
-    public function getFirstMessage($key, $default = null)
+    public function getFirstMessage(string $key, mixed $default = null): mixed
     {
         $messages = self::getMessage($key);
         if (is_array($messages) && count($messages) > 0) {
@@ -168,9 +176,10 @@ class Messages
      * Has Flash Message
      *
      * @param string $key The key to get the message from
+     * 
      * @return bool Whether the message is set or not
      */
-    public function hasMessage($key)
+    public function hasMessage(string $key): bool
     {
         $messages = $this->getMessages();
         return isset($messages[$key]);
@@ -181,7 +190,7 @@ class Messages
      *
      * @return void
      */
-    public function clearMessages()
+    public function clearMessages(): void
     {
         if (isset($this->storage[$this->storageKey])) {
             $this->storage[$this->storageKey] = [];
@@ -194,10 +203,11 @@ class Messages
     /**
      * Clear specific message
      *
-     * @param  String $key The key to clear
+     * @param string $key The key to clear
+     * 
      * @return void
      */
-    public function clearMessage($key)
+    public function clearMessage(string $key): void
     {
         if (isset($this->storage[$this->storageKey][$key])) {
             unset($this->storage[$this->storageKey][$key]);

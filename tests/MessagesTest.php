@@ -1,25 +1,31 @@
 <?php
-namespace Slim\Flash\Tests;
 
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
-use Slim\Flash\Messages;
+declare(strict_types=1);
 
-class MessagesTest extends \PHPUnit_Framework_TestCase
+namespace Firehead996\Flash\Tests;
+
+use PHPUnit\Framework\TestCase;
+
+use Firehead996\Flash\Messages;
+use Firehead996\Flash\MessagesInterface;
+
+class MessagesTest extends TestCase
 {
+    private MessagesInterface $messages;
+
     // Test get messages from previous request
     public function testGetMessagesFromPrevRequest()
     {
-        $storage = ['slimFlash' => ['Test']];
-        $flash = new Messages($storage);
+        $storage = ['flash' => ['Test']];
+        $this->messages = new Messages($storage);
 
-        $this->assertEquals(['Test'], $flash->getMessages());
+        $this->assertEquals(['Test'], $this->messages->getMessages());
     }
 
     // Test a string can be added to a message array for the current request
     public function testAddMessageFromAnIntegerForCurrentRequest()
     {
-        $storage = ['slimFlash' => []];
+        $storage = ['flash' => []];
         $flash   = new Messages($storage);
 
         $flash->addMessageNow('key', 46);
@@ -28,14 +34,14 @@ class MessagesTest extends \PHPUnit_Framework_TestCase
         $messages = $flash->getMessages();
         $this->assertEquals(['46','48'], $messages['key']);
 
-        $this->assertArrayHasKey('slimFlash', $storage);
-        $this->assertEmpty($storage['slimFlash']);
+        $this->assertArrayHasKey('flash', $storage);
+        $this->assertEmpty($storage['flash']);
     }
 
     // Test a string can be added to a message array for the current request
     public function testAddMessageFromStringForCurrentRequest()
     {
-        $storage = ['slimFlash' => []];
+        $storage = ['flash' => []];
         $flash   = new Messages($storage);
 
         $flash->addMessageNow('key', 'value');
@@ -43,14 +49,14 @@ class MessagesTest extends \PHPUnit_Framework_TestCase
         $messages = $flash->getMessages();
         $this->assertEquals(['value'], $messages['key']);
 
-        $this->assertArrayHasKey('slimFlash', $storage);
-        $this->assertEmpty($storage['slimFlash']);
+        $this->assertArrayHasKey('flash', $storage);
+        $this->assertEmpty($storage['flash']);
     }
 
     // Test an array can be added to a message array for the current request
     public function testAddMessageFromArrayForCurrentRequest()
     {
-        $storage = ['slimFlash' => []];
+        $storage = ['flash' => []];
         $flash   = new Messages($storage);
 
         $formData = [
@@ -63,14 +69,14 @@ class MessagesTest extends \PHPUnit_Framework_TestCase
         $messages = $flash->getMessages();
         $this->assertEquals($formData, $messages['old'][0]);
 
-        $this->assertArrayHasKey('slimFlash', $storage);
-        $this->assertEmpty($storage['slimFlash']);
+        $this->assertArrayHasKey('flash', $storage);
+        $this->assertEmpty($storage['flash']);
     }
 
     // Test an object can be added to a message array for the current request
     public function testAddMessageFromObjectForCurrentRequest()
     {
-        $storage = ['slimFlash' => []];
+        $storage = ['flash' => []];
         $flash   = new Messages($storage);
 
         $user = new \stdClass();
@@ -82,39 +88,39 @@ class MessagesTest extends \PHPUnit_Framework_TestCase
         $messages = $flash->getMessages();
         $this->assertInstanceOf(\stdClass::class, $messages['user'][0]);
 
-        $this->assertArrayHasKey('slimFlash', $storage);
-        $this->assertEmpty($storage['slimFlash']);
+        $this->assertArrayHasKey('flash', $storage);
+        $this->assertEmpty($storage['flash']);
     }
 
     // Test a string can be added to a message array for the next request
     public function testAddMessageFromAnIntegerForNextRequest()
     {
-        $storage = ['slimFlash' => []];
+        $storage = ['flash' => []];
         $flash   = new Messages($storage);
 
         $flash->addMessage('key', 46);
         $flash->addMessage('key', 48);
 
-        $this->assertArrayHasKey('slimFlash', $storage);
-        $this->assertEquals(['46', '48'], $storage['slimFlash']['key']);
+        $this->assertArrayHasKey('flash', $storage);
+        $this->assertEquals(['46', '48'], $storage['flash']['key']);
     }
 
     // Test a string can be added to a message array for the next request
     public function testAddMessageFromStringForNextRequest()
     {
-        $storage = ['slimFlash' => []];
+        $storage = ['flash' => []];
         $flash   = new Messages($storage);
 
         $flash->addMessage('key', 'value');
 
-        $this->assertArrayHasKey('slimFlash', $storage);
-        $this->assertEquals(['value'], $storage['slimFlash']['key']);
+        $this->assertArrayHasKey('flash', $storage);
+        $this->assertEquals(['value'], $storage['flash']['key']);
     }
 
     // Test an array can be added to a message array for the next request
     public function testAddMessageFromArrayForNextRequest()
     {
-        $storage = ['slimFlash' => []];
+        $storage = ['flash' => []];
         $flash   = new Messages($storage);
 
         $formData = [
@@ -124,14 +130,14 @@ class MessagesTest extends \PHPUnit_Framework_TestCase
 
         $flash->addMessage('old', $formData);
 
-        $this->assertArrayHasKey('slimFlash', $storage);
-        $this->assertEquals($formData, $storage['slimFlash']['old'][0]);
+        $this->assertArrayHasKey('flash', $storage);
+        $this->assertEquals($formData, $storage['flash']['old'][0]);
     }
 
     // Test an object can be added to a message array for the next request
     public function testAddMessageFromObjectForNextRequest()
     {
-        $storage = ['slimFlash' => []];
+        $storage = ['flash' => []];
         $flash   = new Messages($storage);
 
         $user = new \stdClass();
@@ -140,8 +146,8 @@ class MessagesTest extends \PHPUnit_Framework_TestCase
 
         $flash->addMessage('user', $user);
 
-        $this->assertArrayHasKey('slimFlash', $storage);
-        $this->assertInstanceOf(\stdClass::class, $storage['slimFlash']['user'][0]);
+        $this->assertArrayHasKey('flash', $storage);
+        $this->assertInstanceOf(\stdClass::class, $storage['flash']['user'][0]);
     }
 
     // Test get empty messages from previous request
@@ -156,7 +162,7 @@ class MessagesTest extends \PHPUnit_Framework_TestCase
     // Test set messages for current request
     public function testSetMessagesForCurrentRequest()
     {
-        $storage = ['slimFlash' => [ 'error' => ['An error']]];
+        $storage = ['flash' => [ 'error' => ['An error']]];
 
         $flash = new Messages($storage);
         $flash->addMessageNow('error', 'Another error');
@@ -168,8 +174,8 @@ class MessagesTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['A success'], $messages['success']);
         $this->assertEquals(['An info'], $messages['info']);
 
-        $this->assertArrayHasKey('slimFlash', $storage);
-        $this->assertEmpty([], $storage['slimFlash']);
+        $this->assertArrayHasKey('flash', $storage);
+        $this->assertEquals([], $storage['flash']);
     }
 
     // Test set messages for next request
@@ -181,14 +187,14 @@ class MessagesTest extends \PHPUnit_Framework_TestCase
         $flash->addMessage('Test', 'Test');
         $flash->addMessage('Test', 'Test2');
 
-        $this->assertArrayHasKey('slimFlash', $storage);
-        $this->assertEquals(['Test', 'Test2'], $storage['slimFlash']['Test']);
+        $this->assertArrayHasKey('flash', $storage);
+        $this->assertEquals(['Test', 'Test2'], $storage['flash']['Test']);
     }
     
     //Test getting the message from the key
     public function testGetMessageFromKey()
     {
-        $storage = ['slimFlash' => [ 'Test' => ['Test', 'Test2']]];
+        $storage = ['flash' => [ 'Test' => ['Test', 'Test2']]];
         $flash = new Messages($storage);
 
         $this->assertEquals(['Test', 'Test2'], $flash->getMessage('Test'));
@@ -197,7 +203,7 @@ class MessagesTest extends \PHPUnit_Framework_TestCase
     //Test getting the first message from the key
     public function testGetFirstMessageFromKey()
     {
-        $storage = ['slimFlash' => [ 'Test' => ['Test', 'Test2']]];
+        $storage = ['flash' => [ 'Test' => ['Test', 'Test2']]];
         $flash = new Messages($storage);
 
         $this->assertEquals('Test', $flash->getFirstMessage('Test'));
@@ -206,7 +212,7 @@ class MessagesTest extends \PHPUnit_Framework_TestCase
     //Test getting the default message if the key doesn't exist
     public function testDefaultFromGetFirstMessageFromKeyIfKeyDoesntExist()
     {
-        $storage = ['slimFlash' => []];
+        $storage = ['flash' => []];
         $flash = new Messages($storage);
 
         $this->assertEquals('This', $flash->getFirstMessage('Test', 'This'));
@@ -215,7 +221,7 @@ class MessagesTest extends \PHPUnit_Framework_TestCase
     //Test getting the message from the key
     public function testGetMessageFromKeyIncludingCurrent()
     {
-        $storage = ['slimFlash' => [ 'Test' => ['Test', 'Test2']]];
+        $storage = ['flash' => [ 'Test' => ['Test', 'Test2']]];
         $flash = new Messages($storage);
         $flash->addMessageNow('Test', 'Test3');
 
@@ -226,21 +232,21 @@ class MessagesTest extends \PHPUnit_Framework_TestCase
 
     public function testHasMessage()
     {
-        $storage = ['slimFlash' => []];
+        $storage = ['flash' => []];
         $flash = new Messages($storage);
         $this->assertFalse($flash->hasMessage('Test'));
 
-        $storage = ['slimFlash' => [ 'Test' => ['Test']]];
+        $storage = ['flash' => [ 'Test' => ['Test']]];
         $flash = new Messages($storage);
         $this->assertTrue($flash->hasMessage('Test'));
     }
 
     public function testClearMessages()
     {
-        $storage = ['slimFlash' => []];
+        $storage = ['flash' => []];
         $flash = new Messages($storage);
 
-        $storage = ['slimFlash' => [ 'Test' => ['Test']]];
+        $storage = ['flash' => [ 'Test' => ['Test']]];
         $flash = new Messages($storage);
         $flash->addMessageNow('Now', 'hear this');
         $this->assertTrue($flash->hasMessage('Test'));
@@ -253,10 +259,10 @@ class MessagesTest extends \PHPUnit_Framework_TestCase
 
     public function testClearMessage()
     {
-        $storage = ['slimFlash' => []];
+        $storage = ['flash' => []];
         $flash = new Messages($storage);
 
-        $storage = ['slimFlash' => [ 'Test' => ['Test'], 'Foo' => ['Bar']]];
+        $storage = ['flash' => [ 'Test' => ['Test'], 'Foo' => ['Bar']]];
         $flash = new Messages($storage);
         $flash->addMessageNow('Now', 'hear this');
         $this->assertTrue($flash->hasMessage('Test'));
